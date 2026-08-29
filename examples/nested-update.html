@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>synaps — Nested Update Example</title>
+  <script src="../src/synaps.js"></script>
+
+  <style>
+    .anim-fadeOut { animation: fadeOut 0.3s forwards; }
+    .anim-fadeIn  { animation: fadeIn 0.3s forwards; }
+
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <h2>Nested Update Helper</h2>
+
+  <div class="js-status">Loading...</div>
+  <button id="update">Update Status</button>
+
+  <script>
+    synaps.bind({ status: ".js-status" });
+
+    synaps.status = {
+      text: "Loading...",
+      animate: {
+        out: "anim-fadeOut",
+        in: "anim-fadeIn",
+        duration: 300,
+        swap: "text"
+      }
+    };
+
+    document.querySelector("#update").onclick = () => {
+      synaps.update("status", "text", "Updated!");
+    };
+  </script>
+
+</body>
+</html>
