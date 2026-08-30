@@ -141,15 +141,7 @@ classes | toggles classes
 styles | applies inline styles
 
 ## Examples
-See the examples folder for:
-
-- Basic binding
-- Animated updates
-- GSAP integration
-- Web Animations API
-- Nested update helper
-
-Each example is a standalone HTML file and follows the recommended pattern: stable initial object, nested updates, animation only on content change.
+See the examples folder for standalone HTML files that follow the recommended pattern: stable initial object, nested updates, animation only on content change.
 
 ## How SynapsJS Compares
 SynapsJS is not trying to replace React, Vue, or Svelte. It fills a gap they do not address: reactive DOM updates and animation control with almost no footprint.
