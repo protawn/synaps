@@ -1,5 +1,5 @@
 # Contributing to SynapsJS
-SynapsJS is a tiny reactive DOM micro-engine built by Protawn. If you’re here because you want to contribute, improve something, or explore the internals, that’s genuinely appreciated. SynapsJS exists to help developers build clean, reactive interfaces without the weight of a framework — and contributions that strengthen that mission are always welcome.
+SynapsJS is a tiny reactive DOM micro-engine built by Protawn. If you’re here because you want to contribute, improve something, or explore the internals, that’s genuinely appreciated. SynapsJS exists to help developers build clean, reactive interfaces without the weight of a framework. Contributions that strengthen that mission are always welcome.
 
 That said, SynapsJS is intentionally small, intentionally simple, and intentionally maintained with realistic expectations. Contributions are reviewed on a best-effort basis.
 
