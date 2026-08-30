@@ -1,6 +1,6 @@
 /**
  * SynapsJS — Optimized Full Build
- * Tiny reactive DOM micro‑engine with declarative animation support.
+ * Tiny reactive DOM micro-engine with declarative animation support.
  * © 2026 Protawn — MIT License
  */
 
