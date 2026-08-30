@@ -1,7 +1,8 @@
 /**
  * synaps — A tiny reactive DOM micro‑engine with declarative animation support.
- * Built by Protawn. Designed for maximum power with minimum footprint.
- *
+ * Designed for maximum power with minimum footprint.
+ * © 2026 Protawn — MIT License
+ 
  * Core Features:
  * - Reactive state via Proxy
  * - DOM binding (state → selector)
