@@ -169,10 +169,18 @@ let synaps = {};
     },
 
     createAbortableFetch() {
-      const c = new AbortController();
-      const f = u => fetch(u, { signal: c.signal }).then(r => r.json());
-      f.abort = () => c.abort();
-      return f;
+      const controller = new AbortController();
+      const fn = (url, options = {}) => {
+        const fetchOptions = {
+          method: options.method || "GET",
+          headers: options.headers || {},
+          body: options.body || null,
+          signal: controller.signal
+        };
+        return fetch(url, fetchOptions).then(r => r.json());
+      };
+      fn.abort = () => controller.abort();
+      return fn;
     },
 
     set(target, prop, val) {
@@ -252,7 +260,7 @@ let synaps = {};
   synaps.ajax = {
     fetch(url, opt = {}, onErr) {
       const f = handler.createAbortableFetch();
-      f(url)
+      f(url, opt)
         .then(data => {
           if (opt.hydrate) {
             for (const k in data) synaps[k] = data[k];
