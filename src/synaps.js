@@ -75,10 +75,6 @@ let synaps = {};
 
     // -------------------------------------------------------------------------
     // Update DOM elements bound to a selector
-    // Supports:
-    // - Simple text/number payloads
-    // - Structured payloads (text, html, attrs, classes, styles)
-    // - Declarative animation pipeline
     // -------------------------------------------------------------------------
     updateDOM(selector, payload) {
       if (typeof selector !== "string") return;
@@ -90,9 +86,7 @@ let synaps = {};
         els.forEach(el => {
           if (payload == null) return;
 
-          // ---------------------------------------------------------------
           // Animated payload
-          // ---------------------------------------------------------------
           if (payload.animate) {
             const a = payload.animate;
 
@@ -108,14 +102,12 @@ let synaps = {};
             el.style.animationDelay = del + "ms";
             el.style.animationTimingFunction = ease;
 
-            // Apply "out" animation
             if (typeof out === "string") el.classList.add("anim", out);
             else if (typeof out === "function") out(el);
 
             el.addEventListener("animationend", function hOut() {
               el.removeEventListener("animationend", hOut);
 
-              // Swap content
               if (swap === "text" && payload.text !== undefined) el.textContent = payload.text;
               if (swap === "html" && payload.html !== undefined) el.innerHTML = payload.html;
 
@@ -131,17 +123,14 @@ let synaps = {};
               if (swap === "styles" && payload.styles)
                 for (const n in payload.styles) el.style[n] = payload.styles[n];
 
-              // Remove "out" animation class
               if (typeof out === "string") el.classList.remove(out);
 
-              // Apply "in" animation
               if (typeof inn === "string") el.classList.add(inn);
               else if (typeof inn === "function") inn(el);
 
               el.addEventListener("animationend", function hIn() {
                 el.removeEventListener("animationend", hIn);
 
-                // Cleanup animation styles
                 el.style.animationDuration = "";
                 el.style.animationDelay = "";
                 el.style.animationTimingFunction = "";
@@ -154,17 +143,13 @@ let synaps = {};
             return;
           }
 
-          // ---------------------------------------------------------------
-          // Simple payload (string or number)
-          // ---------------------------------------------------------------
+          // Simple payload
           if (typeof payload === "string" || typeof payload === "number") {
             el.textContent = payload;
             return;
           }
 
-          // ---------------------------------------------------------------
           // Structured payload
-          // ---------------------------------------------------------------
           if (payload.text !== undefined) el.textContent = payload.text;
           if (payload.html !== undefined) el.innerHTML = payload.html;
 
@@ -184,7 +169,7 @@ let synaps = {};
     },
 
     // -------------------------------------------------------------------------
-    // Run effect functions safely (prevent infinite loops)
+    // Run effect functions safely
     // -------------------------------------------------------------------------
     runEffect(fn) {
       if (typeof fn !== "function") return;
@@ -210,12 +195,6 @@ let synaps = {};
 
     // -------------------------------------------------------------------------
     // Proxy setter — the heart of synaps
-    // Handles:
-    // - DOM updates
-    // - Computed properties
-    // - Validators
-    // - Lifecycle hooks
-    // - Effects
     // -------------------------------------------------------------------------
     set(target, prop, val) {
       const old = target[prop];
@@ -230,9 +209,9 @@ let synaps = {};
         return true;
       }
 
-      // Computed properties
+      // Computed properties (PATCHED)
       for (const [key, fn] of Object.entries(handler.computed)) {
-        if (fn.dependencies.includes(prop)) {
+        if (fn.dependencies && fn.dependencies.includes(prop)) {
           target[key] = fn.getter(target);
         }
       }
@@ -250,7 +229,6 @@ let synaps = {};
     }
   };
 
-  // Wrap synaps in Proxy
   synaps = new Proxy(synaps, handler);
 
   // ---------------------------------------------------------------------------
@@ -277,7 +255,7 @@ let synaps = {};
   };
 
   // ---------------------------------------------------------------------------
-  // Nested update helper — preserves animation blocks
+  // Nested update helper
   // ---------------------------------------------------------------------------
   synaps.update = function(key, sub, val) {
     const old = synaps[key] || {};
