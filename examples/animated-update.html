@@ -23,6 +23,7 @@
   <script>
     synaps.bind({ price: ".js-price" });
 
+    // Stable object — no animation on load
     synaps.price = {
       text: "$24.99",
       animate: {
@@ -34,6 +35,7 @@
     };
 
     document.querySelector("#update").onclick = () => {
+      // Only update the text field — animation runs because content changes
       synaps.update("price", "text", "$22.99");
     };
   </script>
