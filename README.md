@@ -217,9 +217,6 @@ Reset SynapsJS to a clean state.
 ## Contributing
 See `CONTRIBUTING.md` for guidelines.
 
-## Security
-See `SECURITY.md` for vulnerability reporting instructions.
-
 ## License
 MIT. See `LICENSE`.
 
