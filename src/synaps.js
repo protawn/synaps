@@ -1,142 +1,121 @@
 /**
- * synaps — A tiny reactive DOM micro‑engine with declarative animation support.
- * Designed for maximum power with minimum footprint.
+ * SynapsJS — Optimized Full Build
+ * Tiny reactive DOM micro‑engine with declarative animation support.
  * © 2026 Protawn — MIT License
- 
- * Core Features:
- * - Reactive state via Proxy
- * - DOM binding (state → selector)
- * - Declarative animation pipeline (out → swap → in → cleanup)
- * - Computed properties
- * - Validators
- * - Lifecycle hooks
- * - Nested update helper
- * - Abortable fetch hydration
- * - Plugin injection
- *
- * No templates. No directives. No virtual DOM. No build step.
- * Just JavaScript.
  */
 
 let synaps = {};
 
 (() => {
 
-  // ---------------------------------------------------------------------------
-  // Internal State
-  // ---------------------------------------------------------------------------
+  const bindings = new Map();
 
-  const bindings = new Map();      // key → CSS selector
   const handler = {
-    previousState: {},
-    isExecuting: false,
-    pendingDOMUpdates: [],
-    rafScheduled: false,
+    previousState:{},
+    isExecuting:!1,
+    pendingDOMUpdates:[],
+    rafScheduled:!1,
+    computed:{},
+    validators:{},
+    lifecycle:{beforeMount:[],mounted:[],beforeUpdate:[],updated:[]},
+    dependencies:{},
+    errorHandler:null,
 
-    computed: {},                  // key → { getter, dependencies }
-    validators: {},                // key → validator function
+    // Unified shallow comparison
+    same(o,n){
+      if(!o||!n||typeof o!=="object"||typeof n!=="object") return !1;
+      if(o.text!==n.text||o.html!==n.html) return !1;
 
-    lifecycle: {
-      beforeMount: [],
-      mounted: [],
-      beforeUpdate: [],
-      updated: []
+      const cmp=(a,b)=>{
+        if(!a&&!b) return !0;
+        if(!a||!b) return !1;
+        const ak=Object.keys(a), bk=Object.keys(b);
+        if(ak.length!==bk.length) return !1;
+        for(const k of ak) if(a[k]!==b[k]) return !1;
+        return !0;
+      };
+
+      return cmp(o.attrs,n.attrs) &&
+             cmp(o.classes,n.classes) &&
+             cmp(o.styles,n.styles);
     },
 
-    dependencies: {},
-    errorHandler: null,
-
-    // -------------------------------------------------------------------------
-    // Bind state keys to DOM selectors
-    // -------------------------------------------------------------------------
-    bind(map) {
-      if (!map || typeof map !== "object") return;
-      for (const k in map) bindings.set(k, map[k]);
+    bind(map){
+      if(!map||typeof map!=="object") return;
+      for(const k in map) bindings.set(k,map[k]);
     },
 
-    // -------------------------------------------------------------------------
-    // Batch DOM updates using requestAnimationFrame
-    // -------------------------------------------------------------------------
-    scheduleDOMUpdate(fn) {
+    scheduleDOMUpdate(fn){
       this.pendingDOMUpdates.push(fn);
-
-      if (!this.rafScheduled) {
-        this.rafScheduled = true;
-
-        requestAnimationFrame(() => {
-          const queue = this.pendingDOMUpdates.slice();
-          this.pendingDOMUpdates.length = 0;
-          this.rafScheduled = false;
-
-          for (const f of queue) f();
+      if(!this.rafScheduled){
+        this.rafScheduled=!0;
+        requestAnimationFrame(()=>{
+          const q=this.pendingDOMUpdates.slice();
+          this.pendingDOMUpdates.length=0;
+          this.rafScheduled=!1;
+          for(const f of q) f();
         });
       }
     },
 
-    // -------------------------------------------------------------------------
-    // Update DOM elements bound to a selector
-    // -------------------------------------------------------------------------
-    updateDOM(selector, payload) {
-      if (typeof selector !== "string") return;
+    updateDOM(sel,p){
+      if(typeof sel!=="string") return;
+      const els=document.querySelectorAll(sel);
+      if(!els.length) return;
 
-      const els = document.querySelectorAll(selector);
-      if (!els.length) return;
+      this.scheduleDOMUpdate(()=>{
 
-      this.scheduleDOMUpdate(() => {
-        els.forEach(el => {
-          if (payload == null) return;
+        els.forEach(el=>{
+          if(p==null) return;
 
-          // Animated payload
-          if (payload.animate) {
-            const a = payload.animate;
+          // Animation block
+          if(p.animate){
+            const a=p.animate,
+                  out=a.out||null,
+                  inn=a.in||null,
+                  dur=a.duration||300,
+                  del=a.delay||0,
+                  ease=a.easing||"ease",
+                  swap=a.swap||"text",
+                  done=a.onComplete||null;
 
-            const out = a.out || null;
-            const inn = a.in || null;
-            const dur = a.duration || 300;
-            const del = a.delay || 0;
-            const ease = a.easing || "ease";
-            const swap = a.swap || "text";
-            const done = a.onComplete || null;
+            el.style.animationDuration=dur+"ms";
+            el.style.animationDelay=del+"ms";
+            el.style.animationTimingFunction=ease;
 
-            el.style.animationDuration = dur + "ms";
-            el.style.animationDelay = del + "ms";
-            el.style.animationTimingFunction = ease;
+            if(typeof out==="string") el.classList.add("anim",out);
+            else if(typeof out==="function") out(el);
 
-            if (typeof out === "string") el.classList.add("anim", out);
-            else if (typeof out === "function") out(el);
+            el.addEventListener("animationend",function h(){
+              el.removeEventListener("animationend",h);
 
-            el.addEventListener("animationend", function hOut() {
-              el.removeEventListener("animationend", hOut);
+              if(swap==="text" && p.text!==undefined) el.textContent=p.text;
+              if(swap==="html" && p.html!==undefined) el.innerHTML=p.html;
 
-              if (swap === "text" && payload.text !== undefined) el.textContent = payload.text;
-              if (swap === "html" && payload.html !== undefined) el.innerHTML = payload.html;
-
-              if (swap === "attrs" && payload.attrs)
-                for (const n in payload.attrs) {
-                  const v = payload.attrs[n];
-                  v == null ? el.removeAttribute(n) : el.setAttribute(n, v);
+              if(swap==="attrs" && p.attrs)
+                for(const k in p.attrs){
+                  const v=p.attrs[k];
+                  v==null?el.removeAttribute(k):el.setAttribute(k,v);
                 }
 
-              if (swap === "classes" && payload.classes)
-                for (const n in payload.classes) el.classList.toggle(n, !!payload.classes[n]);
+              if(swap==="classes" && p.classes)
+                for(const k in p.classes) el.classList.toggle(k,!!p.classes[k]);
 
-              if (swap === "styles" && payload.styles)
-                for (const n in payload.styles) el.style[n] = payload.styles[n];
+              if(swap==="styles" && p.styles)
+                for(const k in p.styles) el.style[k]=p.styles[k];
 
-              if (typeof out === "string") el.classList.remove(out);
+              if(typeof out==="string") el.classList.remove(out);
 
-              if (typeof inn === "string") el.classList.add(inn);
-              else if (typeof inn === "function") inn(el);
+              if(typeof inn==="string") el.classList.add(inn);
+              else if(typeof inn==="function") inn(el);
 
-              el.addEventListener("animationend", function hIn() {
-                el.removeEventListener("animationend", hIn);
-
-                el.style.animationDuration = "";
-                el.style.animationDelay = "";
-                el.style.animationTimingFunction = "";
-
-                if (typeof inn === "string") el.classList.remove(inn);
-                if (typeof done === "function") done(el);
+              el.addEventListener("animationend",function h2(){
+                el.removeEventListener("animationend",h2);
+                el.style.animationDuration="";
+                el.style.animationDelay="";
+                el.style.animationTimingFunction="";
+                if(typeof inn==="string") el.classList.remove(inn);
+                if(typeof done==="function") done(el);
               });
             });
 
@@ -144,171 +123,136 @@ let synaps = {};
           }
 
           // Simple payload
-          if (typeof payload === "string" || typeof payload === "number") {
-            el.textContent = payload;
+          if(typeof p==="string"||typeof p==="number"){
+            el.textContent=p;
             return;
           }
 
           // Structured payload
-          if (payload.text !== undefined) el.textContent = payload.text;
-          if (payload.html !== undefined) el.innerHTML = payload.html;
+          if(p.text!==undefined) el.textContent=p.text;
+          if(p.html!==undefined) el.innerHTML=p.html;
 
-          if (payload.attrs)
-            for (const n in payload.attrs) {
-              const v = payload.attrs[n];
-              v == null ? el.removeAttribute(n) : el.setAttribute(n, v);
+          if(p.attrs)
+            for(const k in p.attrs){
+              const v=p.attrs[k];
+              v==null?el.removeAttribute(k):el.setAttribute(k,v);
             }
 
-          if (payload.classes)
-            for (const n in payload.classes) el.classList.toggle(n, !!payload.classes[n]);
+          if(p.classes)
+            for(const k in p.classes) el.classList.toggle(k,!!p.classes[k]);
 
-          if (payload.styles)
-            for (const n in payload.styles) el.style[n] = payload.styles[n];
+          if(p.styles)
+            for(const k in p.styles) el.style[k]=p.styles[k];
         });
+
       });
     },
 
-    // -------------------------------------------------------------------------
-    // Run effect functions safely
-    // -------------------------------------------------------------------------
-    runEffect(fn) {
-      if (typeof fn !== "function") return;
-
-      if (this.isExecuting) {
+    runEffect(fn){
+      if(typeof fn!=="function") return;
+      if(this.isExecuting){
         console.warn("Potential infinite loop detected. Effect skipped.");
         return;
       }
-
-      this.isExecuting = true;
-      try { fn() } finally { this.isExecuting = false }
+      this.isExecuting=!0;
+      try{ fn() } finally{ this.isExecuting=!1 }
     },
 
-    // -------------------------------------------------------------------------
-    // Create an abortable fetch wrapper
-    // -------------------------------------------------------------------------
-    createAbortableFetch() {
-      const c = new AbortController();
-      const f = url => fetch(url, { signal: c.signal }).then(r => r.json());
-      f.abort = () => c.abort();
+    createAbortableFetch(){
+      const c=new AbortController();
+      const f=u=>fetch(u,{signal:c.signal}).then(r=>r.json());
+      f.abort=()=>c.abort();
       return f;
     },
 
-    // -------------------------------------------------------------------------
-    // Proxy setter — the heart of synaps
-    // -------------------------------------------------------------------------
-    set(target, prop, val) {
-      const old = target[prop];
-      target[prop] = val;
+    set(target,prop,val){
+      const old=target[prop];
+      target[prop]=val;
 
-      if (old === val) return true;
+      // Primitive equality
+      if(old===val) return !0;
 
-      // Validators
-      const validator = this.validators[prop];
-      if (validator && !validator(val)) {
+      // Shallow content equality
+      if(typeof old==="object" && typeof val==="object" && this.same(old,val))
+        return !0;
+
+      // Validator
+      const v=this.validators[prop];
+      if(v && !v(val)){
         console.warn(`Validation failed for "${prop}"`);
-        return true;
+        return !0;
       }
 
-      // Computed properties (PATCHED)
-      for (const [key, fn] of Object.entries(handler.computed)) {
-        if (fn.dependencies && fn.dependencies.includes(prop)) {
-          target[key] = fn.getter(target);
-        }
+      // Computed
+      for(const k in this.computed){
+        const c=this.computed[k];
+        if(c.dependencies && c.dependencies.includes(prop))
+          target[k]=c.getter(target);
       }
 
       // DOM binding
-      const sel = bindings.get(prop);
-      if (sel) this.updateDOM(sel, val);
+      const sel=bindings.get(prop);
+      if(sel) this.updateDOM(sel,val);
 
       // Effects
-      if (typeof val === "function") this.runEffect(val);
-      else if (val && typeof val.perform === "function") this.runEffect(val.perform);
+      if(typeof val==="function") this.runEffect(val);
+      else if(val && typeof val.perform==="function") this.runEffect(val.perform);
 
-      this.previousState[prop] = val;
-      return true;
+      this.previousState[prop]=val;
+      return !0;
     }
   };
 
-  synaps = new Proxy(synaps, handler);
+  synaps=new Proxy(synaps,handler);
 
-  // ---------------------------------------------------------------------------
-  // AJAX helper
-  // ---------------------------------------------------------------------------
-  synaps.ajax = {
-    fetch(url, opt = {}, onErr) {
-      const f = handler.createAbortableFetch();
-
+  synaps.ajax={
+    fetch(url,opt={},onErr){
+      const f=handler.createAbortableFetch();
       f(url)
-        .then(data => {
-          if (opt.hydrate) {
-            for (const k in data) synaps[k] = data[k];
-          } else if (typeof opt.onData === "function") {
-            opt.onData(data, synaps);
+        .then(data=>{
+          if(opt.hydrate){
+            for(const k in data) synaps[k]=data[k];
+          } else if(typeof opt.onData==="function"){
+            opt.onData(data,synaps);
           }
         })
-        .catch(err => {
-          if (typeof onErr === "function") onErr(err, synaps);
+        .catch(err=>{
+          if(typeof onErr==="function") onErr(err,synaps);
         });
-
       return f;
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // Nested update helper
-  // ---------------------------------------------------------------------------
-  synaps.update = function(key, sub, val) {
-    const old = synaps[key] || {};
-    const obj = { ...old, [sub]: val };
-
-    if (old.animate) obj.animate = old.animate;
-    synaps[key] = obj;
+  synaps.update=function(key,sub,val){
+    const old=synaps[key]||{};
+    const obj={...old,[sub]:val};
+    if(old.animate) obj.animate=old.animate;
+    synaps[key]=obj;
   };
 
-  // ---------------------------------------------------------------------------
-  // Public API bindings
-  // ---------------------------------------------------------------------------
-  synaps.bind = handler.bind.bind(handler);
+  synaps.bind=handler.bind.bind(handler);
+  synaps.addComputed=(k,g,d)=>handler.computed[k]={getter:g,dependencies:d};
+  synaps.addValidator=(k,v)=>handler.validators[k]=v;
 
-  synaps.addComputed = function(key, getter, dependencies) {
-    handler.computed[key] = { getter, dependencies };
-  };
+  synaps.onBeforeMount=f=>handler.lifecycle.beforeMount.push(f);
+  synaps.onMounted=f=>handler.lifecycle.mounted.push(f);
+  synaps.onBeforeUpdate=f=>handler.lifecycle.beforeUpdate.push(f);
+  synaps.onUpdated=f=>handler.lifecycle.updated.push(f);
 
-  synaps.addValidator = function(key, validator) {
-    handler.validators[key] = validator;
-  };
+  synaps.setErrorHandler=f=>handler.errorHandler=f;
+  synaps.inject=(k,v)=>handler[k]=v;
 
-  synaps.onBeforeMount = fn => handler.lifecycle.beforeMount.push(fn);
-  synaps.onMounted     = fn => handler.lifecycle.mounted.push(fn);
-  synaps.onBeforeUpdate = fn => handler.lifecycle.beforeUpdate.push(fn);
-  synaps.onUpdated      = fn => handler.lifecycle.updated.push(fn);
-
-  synaps.setErrorHandler = fn => handler.errorHandler = fn;
-
-  synaps.inject = function(key, value) {
-    handler[key] = value;
-  };
-
-  // ---------------------------------------------------------------------------
-  // Reset synaps to a clean state
-  // ---------------------------------------------------------------------------
-  synaps.reset = function() {
-    handler.previousState = {};
-    handler.isExecuting = false;
-    handler.pendingDOMUpdates = [];
-    handler.rafScheduled = false;
-    handler.computed = {};
-    handler.validators = {};
-    handler.lifecycle = {
-      beforeMount: [],
-      mounted: [],
-      beforeUpdate: [],
-      updated: []
-    };
-    handler.dependencies = {};
-    handler.errorHandler = null;
-
-    synaps = new Proxy(synaps, handler);
+  synaps.reset=function(){
+    handler.previousState={};
+    handler.isExecuting=!1;
+    handler.pendingDOMUpdates=[];
+    handler.rafScheduled=!1;
+    handler.computed={};
+    handler.validators={};
+    handler.lifecycle={beforeMount:[],mounted:[],beforeUpdate:[],updated:[]};
+    handler.dependencies={};
+    handler.errorHandler=null;
+    synaps=new Proxy(synaps,handler);
   };
 
 })();
