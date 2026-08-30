@@ -5,7 +5,14 @@
   <title>synaps — Basic Binding Example</title>
   <script src="../src/synaps.js"></script>
   <style>
-    .box { padding: 10px; background: #eee; display: inline-block; }
+    .box {
+      padding: 10px;
+      background: #eee;
+      display: inline-block;
+      font-size: 20px;
+      min-width: 40px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -16,12 +23,15 @@
   <button id="inc">Increment</button>
 
   <script>
+    // Bind the state key to the DOM element
     synaps.bind({
       count: ".js-count"
     });
 
+    // Initial value
     synaps.count = 0;
 
+    // Increment on click
     document.querySelector("#inc").onclick = () => {
       synaps.count++;
     };
