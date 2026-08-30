@@ -27,22 +27,11 @@ synaps.count = 42;
 ### Content Unchanged Guard
 SynapsJS automatically skips DOM updates and animations when the new value is structurally identical to the previous value. This prevents flicker, double animations, and unnecessary work.
 
+### True separation of concerns
+SynapsJS keeps markup and logic permanently separate. HTML stays declarative. JavaScript stays imperative. No templates, no directives, no components, no virtual DOM.
+
 ### Declarative Animation Pipeline
-SynapsJS treats animation as a first-class feature.
-
-**Code**
-```
-out -> swap -> in -> cleanup -> onComplete
-```
-
-**Supports:**
-- CSS animation classes
-- Custom JS animation functions
-- GSAP
-- Web Animations API
-- Any animation library
-
-Animations never run on initial assignment. They only run when content actually changes. Animation functions may be synchronous or asynchronous. SynapsJS awaits asynchronous animation functions such as those using the Web Animations API.
+SynapsJS includes a minimal animation pipeline that can enhance API driven UI updates. Animations never run on initial assignment and only run when content actually changes. Animation functions may be synchronous or asynchronous.
 
 ### Nested Update Helper
 Preserves animation blocks when updating nested values.
@@ -147,26 +136,12 @@ styles | applies inline styles
 See the examples folder for standalone HTML files that follow the recommended pattern: stable initial object, nested updates, animation only on content change.
 
 ## How SynapsJS Compares
-SynapsJS is not trying to replace React, Vue, or Svelte. It fills a gap they do not address: reactive DOM updates and animation control with almost no footprint.
-
-### Compared to big frameworks
-- They offer full component systems, routing, SSR, and tooling.
-- SynapsJS offers reactive DOM and animation in under 5 kb.
-
-### Compared to Alpine.js and Petite Vue
-- They use HTML directives and templating.
-- SynapsJS is pure JavaScript, smaller, and animation native.
-
-### Compared to jQuery
-- jQuery manipulates DOM manually.
-- SynapsJS reactively updates DOM and animates changes.
+SynapsJS is not trying to replace React, Vue, or Svelte. It fills a gap they do not address: updating markup in response to API data with perfect clarity and zero ceremony. SynapsJS does this without templates, without directives, without components, and without virtual DOM.
 
 **SynapsJS is not a framework. It is a micro engine.**
 
 ## Design Philosophy
-Protawn builds software with a simple belief: maximum power, minimum footprint.
-
-SynapsJS embodies that philosophy.
+Protawn builds software with a simple belief: maximum power, minimum footprint. SynapsJS embodies a principle that has been talked about for decades but never achieved: true separation of concerns between markup and logic. SynapsJS embodies the Protawn philosophy.
 
 - Tiny, readable code
 - Zero dependencies
