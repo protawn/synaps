@@ -2,15 +2,18 @@
 A tiny reactive DOM micro engine with declarative animation support. Built by Protawn, it delivers maximum power with minimum footprint.
 
 ## Overview
-SynapsJS binds JavaScript state directly to the DOM. When a state property changes, SynapsJS updates the DOM automatically. It can also animate those updates with precision.
+SynapsJS binds JavaScript state directly to the DOM and updates markup in response to API interactions. It does this without templates, without directives, without components, and without virtual DOM. Your HTML stays HTML. Your JavaScript stays JavaScript. The concerns remain permanently separated.
 
-- No templates.
-- No directives.
-- No virtual DOM.
-- No build step.
-- Just JavaScript.
+SynapsJS is designed for developers who want reactive UI behavior without the weight of a framework and who value clarity, simplicity, and true separation of concerns.
 
-SynapsJS is designed for developers who want reactive UI behavior without the weight of a full framework and value simplicity, readability, and ease of adoption.
+## What SynapsJS Solves
+Modern UI tools claim to separate concerns, but they never truly do. Templates mix HTML and JavaScript. Directives mix HTML and JavaScript. Components mix HTML and JavaScript. Virtual DOM mixes HTML and JavaScript. Hydration mixes HTML and JavaScript.
+
+SynapsJS finally achieves the separation that everyone talked about but never delivered.
+
+SynapsJS updates markup in response to API data without re rendering, without templating, and without embedding logic inside markup. Your HTML remains declarative. Your JavaScript remains imperative. The two never bleed into each other.
+
+This makes SynapsJS ideal for API driven interfaces, dashboards, forms, and SPAs that want perfect SEO because all markup is present at load.
 
 ## Key Features
 ### Reactive State
