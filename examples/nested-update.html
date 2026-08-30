@@ -23,6 +23,7 @@
   <script>
     synaps.bind({ status: ".js-status" });
 
+    // Stable object — no animation on initial load
     synaps.status = {
       text: "Loading...",
       animate: {
@@ -34,6 +35,7 @@
     };
 
     document.querySelector("#update").onclick = () => {
+      // Only update the text field — animation runs because content changes
       synaps.update("status", "text", "Updated!");
     };
   </script>
