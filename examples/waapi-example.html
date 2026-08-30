@@ -19,19 +19,20 @@
   <script>
     synaps.bind({ price: ".js-price" });
 
+    // Stable object — no animation on initial load
     synaps.price = {
       text: "$20.00",
       animate: {
-        out(el) {
-          return el.animate(
+        async out(el) {
+          await el.animate(
             [{ opacity: 1 }, { opacity: 0 }],
-            { duration: 200 }
+            { duration: 200, fill: "forwards" }
           ).finished;
         },
-        in(el) {
-          return el.animate(
+        async in(el) {
+          await el.animate(
             [{ opacity: 0 }, { opacity: 1 }],
-            { duration: 200 }
+            { duration: 200, fill: "forwards" }
           ).finished;
         },
         swap: "text"
@@ -39,6 +40,7 @@
     };
 
     document.querySelector("#update").onclick = () => {
+      // Only update the text field — animation runs because content changes
       synaps.update("price", "text", "$17.50");
     };
   </script>
