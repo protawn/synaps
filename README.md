@@ -13,7 +13,7 @@ SynapsJS finally achieves the separation that everyone talked about but never de
 
 SynapsJS updates markup in response to API data without re-rendering, without templating, and without embedding logic inside markup. Your HTML remains declarative. Your JavaScript remains imperative. The two never bleed into each other.
 
-This makes SynapsJS ideal for API-driven interfaces, dashboards, forms, and SPAs that want perfect SEO because all markup is present at load.
+This makes SynapsJS ideal for API-driven interfaces, dashboards, forms, and SPAs that want perfect SEO because all markup is present at load. It can also play a key role in managing the presentation layer of headless CMS solutions.
 
 ## Key Features
 ### Reactive State
@@ -75,7 +75,7 @@ synaps.ajax.fetch("/api/data", { hydrate: true });
 ```
 
 ### Zero Dependencies
-SynapsJS is roughly 300 lines of optimized JavaScript. No dependencies, no build step, no ceremony.
+SynapsJS is a few hundred lines of optimized JavaScript. No dependencies, no build step, no ceremony.
 
 ## Quick Start
 ### Include SynapsJS
@@ -184,6 +184,6 @@ See `CONTRIBUTING.md` for guidelines.
 MIT. See `LICENSE`.
 
 ## Final Note
-SynapsJS is intentionally small, intentionally simple, and intentionally powerful. It gives you reactive UI behavior and animation control without the weight of a framework and without asking you to learn anything beyond JavaScript.
+SynapsJS is intentionally small, simple, and powerful. It gives you reactive UI behavior and animation control without the weight of a framework and without asking you to learn anything beyond JavaScript.
 
 Built by Protawn. Made for developers. Approachable for everyone.
